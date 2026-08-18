@@ -77,9 +77,24 @@ void delet_contact(char *name)
     }
 }
 
-Contact_t modify_contact(char name)
+Contact_t modify_contact(char *name)
 {
-    
+    int found=0;
+
+    for(int i=0;i<count_contact;i++)
+    {
+        if(strcmp(contacts[i].name, name)==0)
+        {
+            for(int j=i;j<count_contact-1;j++)
+            {
+                contacts[j]=contacts[j+1];
+            }
+            memset(&contacts[count_contact-1],0,sizeof(Contact_t));
+            count_contact--;
+            found=1;
+            break;
+        }
+    }
 }
 
 Contact_t display_all()
@@ -115,7 +130,15 @@ int main()
                 scanf("%49s",name);
                 delet_contact(name);
                 break;
-            // case 4:
+            case 4:
+                printf("请选择要修改的联系人：");
+                scanf("%49s",name);
+                modify_contact(name);
+                printf("请输入要修改的内容：");
+                scanf("%49s%14s",name,phone);
+                add_contact(name ,phone);
+                printf("修改成功\n");
+                break;
             case 5:
                 return 0;
             default:
