@@ -79,9 +79,45 @@ int add_students(seq_list_t *list,int id,char *name,int *scores)
     return 0;
 }
 
-void seq_display(const seq_list_t *list)
+int seq_delete(seq_list_t *list, int id, student_t *out)
 {
     
+}
+
+void seq_display(const seq_list_t *list)
+{
+    if(list==NULL || list->length==0)
+    {
+        printf("暂无学生记录。\n");
+        return;
+    }
+
+    student_t *sort=malloc(list->length *sizeof(*sort));
+
+    if(sort==NULL)
+    {
+        printf("排序失败：内存不足。\n");
+        return;
+    }
+
+    memcpy(sort,list->data,list->length*sizeof(*sort));
+    for(int i=0;i<list->length-1 ;i++)
+    {
+        for(int j=0;j<list->length-1-i;j++)
+        {
+            if(sort[j].avg<sort[j+1].avg)
+            {
+                student_t temp=sort[j];
+                sort[j]=sort[j+1];
+                sort[j+1]=temp;
+            }
+        }
+    }
+
+    for(int i=0;i<list->length;i++)
+        print_students(&sort[i]);
+
+    free(sort);
 }
 
 int seq_destroy(seq_list_t *list)
@@ -97,8 +133,8 @@ int seq_destroy(seq_list_t *list)
 
 int main()
 {
-    seq_list_t students;
-    if(seq_init(&students)!=0)
+    seq_list_t *students;
+    if(seq_init(students)!=0)
     {
         fprintf(stderr,"初始化失败\n");
         return EXIT_FAILURE;
@@ -108,7 +144,7 @@ int main()
         printf("1. 添加学生\n2. 删除学生\n3. 修改学生信息\n4. 查找学生\n5. 显示所有学生\n6. 显示补考名单\n7. 撤销上一步操作\n8. 退出\n");
         if(scanf("%d",&n)!=1)
         {
-            seq_destroy(&students);
+            seq_destroy(students);
             return EXIT_FAILURE;
         }
         switch(n)
@@ -121,16 +157,22 @@ int main()
                 printf("请输入5科成绩：");
                 for(int i=0;i<5;i++)
                     scanf("%d",&s.scores[i]);
-                if(add_students(&students,s.id,s.name,s.scores)!=0)
+                if(add_students(students,s.id,s.name,s.scores)!=0)
                     printf("添加失败，学生数量已达上限\n");
                 break;
             //case 2:
+            // case 3:
+            // case 4:
+            case 5:
+                seq_display(students);
+                break;
+            // case 6:
+            // case 7:
             default:
                 break;
-
         }
     }while(n!=8);
 
-    seq_destroy(&students);
+    seq_destroy(students);
     return EXIT_SUCCESS;
 }
