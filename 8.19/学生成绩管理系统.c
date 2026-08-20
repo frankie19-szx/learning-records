@@ -7,7 +7,6 @@ typedef struct{
     int scores[5];
     float avg;
 }student_t;
-
 typedef struct{
     student_t *data;
     int length;
@@ -19,18 +18,15 @@ typedef struct fail_node{
     int student_id;
     struct fail_node *next;
 }fail_node_t;
-
 typedef struct{
     fail_node_t *head;
     int count;
 }fail_list_t;
-
 typedef enum{
     OP_ADD=1,
     OP_DEL=2,
     OP_MOD=3
 }op_type_t;
-
 typedef struct{
     op_type_t type;
     student_t old_data;
@@ -102,26 +98,50 @@ int seq_delete(seq_list_t *list, int id,student_t *out)
     return -1;
 }
 
-int seq_insert(seq_list_t *list, const student_t *stu)
+int seq_update(seq_list_t *list, int id,student_t *new)
 {
+    if(list==NULL||new==NULL)
+        return -1;
 
-}
+    float sum=0.0;
+    for(int i=0;i<5;i++)
+        sum+=new->scores[i];
+    new->avg=sum/5;
 
-int seq_update(seq_list_t *list, int id, const student_t *new)
-{
-    
+    for(int i=0;i<list->length;i++)
+    {
+        if(list->data[i].id==id)
+        {
+            list->data[i]=*new;
+            return 0;
+        }
+    }
+
+    return -1;
 }
 
 int seq_find_by_id(const seq_list_t *list, int id, student_t *out)
 {
+    if(list==NULL||out==NULL)
+        return -1;
 
+    for(int i=0;i<list->length;i++)
+    {
+        if(list->data[i].id==id)
+        {
+            *out=list->data[i];
+            return 0;
+        }
+    }
+
+    return -1;
 }
 
 void seq_display(const seq_list_t *list)
 {
     if(list==NULL || list->length==0)
     {
-        printf("暂无学生记录。\n");
+        printf("暂无学生记录\n");
         return;
     }
 
@@ -129,7 +149,7 @@ void seq_display(const seq_list_t *list)
 
     if(sort==NULL)
     {
-        printf("排序失败：内存不足。\n");
+        printf("排序失败：内存不足\n");
         return;
     }
 
@@ -166,14 +186,8 @@ int seq_destroy(seq_list_t *list)
 
 int seq_is_empty(const seq_list_t *list)
 {
-
+    return list==NULL || list->length==0;
 }
-
-int fail_init(fail_list_t *list)
-{
-
-}
-
 
 int main()
 {
@@ -186,6 +200,8 @@ int main()
     int n;
     student_t s;
     student_t deleted_student;
+    student_t updated_student;
+    student_t found_student;
     do{
         printf("1. 添加学生\n2. 删除学生\n3. 修改学生信息\n4. 查找学生\n5. 显示所有学生\n6. 显示补考名单\n7. 撤销上一步操作\n8. 退出\n");
         if(scanf("%d",&n)!=1)
@@ -206,7 +222,7 @@ int main()
                     printf("添加失败，学生数量已达上限\n");
                 break;
             case 2:
-                printf("请输入要删除的学生：");
+                printf("请输入要删除的学生的学号：");
                 if(scanf("%d",&s.id)!=1)
                 {
                     printf("学号输入无效\n");
@@ -223,13 +239,49 @@ int main()
                     printf("未找到该学生\n");
                 
                 break;
-            // case 3:
-            // case 4:
+            case 3:
+                printf("请输入要修改的学生的学号：");
+                if(scanf("%d",&updated_student.id)!=1)
+                {
+                    printf("学号输入无效");
+                    break;
+                }
+                printf("请修改：");
+                if(scanf("%s",updated_student.name)!=1)
+                    break;
+                for(int i=0;i<5;i++)
+                {
+                    if(scanf("%d",&updated_student.scores[i])!=1)
+                    {
+                        printf("成绩输入无效\n");
+                        break;
+                    }
+                }
+                printf("修改后的学生：");
+                if(seq_update(&students,updated_student.id,&updated_student)==0)
+                    print_students(&updated_student);
+                else    
+                    printf("未找到学生\n");
+                break;
+            case 4:
+                printf("请输入要查找的学生学号：");
+                if(scanf("%d",&found_student.id)!=1)
+                {
+                    printf("学号输入无效");
+                    break;
+                }
+                printf("该学生信息：");
+                if(seq_find_by_id(&students,found_student.id,&found_student)==0)
+                {
+                    print_students(&found_student);
+                    break;
+                }
+                else
+                    printf("学号输入无效");
+                break;
             case 5:
                 seq_display(&students);
                 break;
-            // case 6:
-            // case 7:
             default:
                 break;
         }
