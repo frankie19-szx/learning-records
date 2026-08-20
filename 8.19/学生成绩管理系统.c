@@ -15,7 +15,6 @@ typedef struct{
 }seq_list_t;
 
 #define MAX_STUDENTS 100
-student_t students[MAX_STUDENTS];
 typedef struct fail_node{
     int student_id;
     struct fail_node *next;
@@ -79,9 +78,43 @@ int add_students(seq_list_t *list,int id,char *name,int *scores)
     return 0;
 }
 
-int seq_delete(seq_list_t *list, int id, student_t *out)
+int seq_delete(seq_list_t *list, int id,student_t *out)
+{
+    if(list==NULL||out==NULL)
+        return -1;
+    
+    for(int i=0;i<list->length;i++)
+    {
+        if(list->data[i].id==id)
+        {
+            *out=list->data[i];
+
+            for(int j=i;j<list->length-1;j++)
+            {
+                list->data[j]=list->data[j+1];
+            }
+
+            list->length--;
+            return 0;
+        }
+    }
+
+    return -1;
+}
+
+int seq_insert(seq_list_t *list, const student_t *stu)
+{
+
+}
+
+int seq_update(seq_list_t *list, int id, const student_t *new)
 {
     
+}
+
+int seq_find_by_id(const seq_list_t *list, int id, student_t *out)
+{
+
 }
 
 void seq_display(const seq_list_t *list)
@@ -131,40 +164,69 @@ int seq_destroy(seq_list_t *list)
     return 0;
 }
 
+int seq_is_empty(const seq_list_t *list)
+{
+
+}
+
+int fail_init(fail_list_t *list)
+{
+
+}
+
+
 int main()
 {
-    seq_list_t *students;
-    if(seq_init(students)!=0)
+    seq_list_t students;
+    if(seq_init(&students)!=0)
     {
         fprintf(stderr,"初始化失败\n");
         return EXIT_FAILURE;
     }
     int n;
+    student_t s;
+    student_t deleted_student;
     do{
         printf("1. 添加学生\n2. 删除学生\n3. 修改学生信息\n4. 查找学生\n5. 显示所有学生\n6. 显示补考名单\n7. 撤销上一步操作\n8. 退出\n");
         if(scanf("%d",&n)!=1)
         {
-            seq_destroy(students);
+            seq_destroy(&students);
             return EXIT_FAILURE;
         }
         switch(n)
         {
             case 1:
-                student_t s;
                 printf("请输入学生学号与姓名：");
                 if(scanf("%d%19s",&s.id,s.name)!=2)
                     break;
                 printf("请输入5科成绩：");
                 for(int i=0;i<5;i++)
                     scanf("%d",&s.scores[i]);
-                if(add_students(students,s.id,s.name,s.scores)!=0)
+                if(add_students(&students,s.id,s.name,s.scores)!=0)
                     printf("添加失败，学生数量已达上限\n");
                 break;
-            //case 2:
+            case 2:
+                printf("请输入要删除的学生：");
+                if(scanf("%d",&s.id)!=1)
+                {
+                    printf("学号输入无效\n");
+                    break;
+                }
+                
+                if(seq_delete(&students,s.id,&deleted_student)==0)
+                {
+                    printf("删除的学生：");
+                    print_students(&deleted_student);
+                }
+
+                else 
+                    printf("未找到该学生\n");
+                
+                break;
             // case 3:
             // case 4:
             case 5:
-                seq_display(students);
+                seq_display(&students);
                 break;
             // case 6:
             // case 7:
@@ -173,6 +235,6 @@ int main()
         }
     }while(n!=8);
 
-    seq_destroy(students);
+    seq_destroy(&students);
     return EXIT_SUCCESS;
 }
